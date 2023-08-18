@@ -1,0 +1,9 @@
+// module.exports.authService = require('./auth.service');
+// module.exports.emailService = require('./email.service');
+// module.exports.tokenService = require('./token.service');
+// module.exports.userService = require('./user.service');
+module.exports.dynaAppService = require('./dynaapp.service');
+module.exports.dynaFormService = require('./dynaform.service');
+module.exports.dynaTableService = require('./dynatable.service');
+module.exports.dynaColumnService = require('./dynacolumn.service');
+module.exports.dynaCollectionService = require('./dbCollection.service');
