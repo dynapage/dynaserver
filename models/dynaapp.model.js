@@ -55,7 +55,7 @@ const dynaappSchema = mongoose.Schema(
       teamboard: {
         type: Boolean,
         default: false,
-      }
+      },
     },
 
     designers: [DynaDesigner.schema],
@@ -71,27 +71,25 @@ const dynaappSchema = mongoose.Schema(
           type: Number,
           default: 0,
         },
-        users:
-          [
-            {
-              userId: {
-                type: String,
-              },
-              username: {
-                type: String,
-              },
-              userpwd: {
-                type: String,
-              },
-              _id: {
-                type: ObjectId,
-                auto: true,
-                required: true,
-              },
-            }
-
-          ]
-      }
+        users: [
+          {
+            userId: {
+              type: String,
+            },
+            username: {
+              type: String,
+            },
+            userpwd: {
+              type: String,
+            },
+            _id: {
+              type: ObjectId,
+              auto: true,
+              required: true,
+            },
+          },
+        ],
+      },
     ],
   },
   { versionKey: false, timestamps: true }

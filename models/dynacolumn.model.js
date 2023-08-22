@@ -25,7 +25,7 @@ const dynaColumnSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
-  
+
     editable: {
       type: Boolean,
       default: false,

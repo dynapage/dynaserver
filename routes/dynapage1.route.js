@@ -13,6 +13,7 @@ router.route('/applicationteams/:id').get(dynaAppController.getAppTeams);
 router.route('/applicationteams/:id').put(dynaAppController.updateAppTeams);
 router.route('/applications_by_user/:designerid').get(dynaAppController.getAppByUserEmail);
 router.route('/applications_signin/:siteid/:userid/:pwd').get(dynaAppController.getDynaAppBySignIn);
+
 ////siteid, userid, pwd
 router.route('/applications_by_count/:id').get(dynaAppController.getAppByCount);
 router.route('/application_save_changes/:id').put(dynaAppController.updateDynaApp);
@@ -37,6 +38,7 @@ router.route('/updatesections/:id/:formid').put(dynaFormController.updateDynaSec
 
 router.route('/grids/:appid').get(dynaFormController.getGrids);
 router.route('/getsections/:appid/:formid').get(dynaFormController.getFormSections);
+
 //router.route('/columnsbyform/:appid/:formid').get(dynaColumnController.getColumns);
 router.route('/columns/:appid/:id').get(dynaColumnController.getColumns);
 router.route('/column/:appid/:tableid/:columnid').put(dynaColumnController.updateColumn);
@@ -56,16 +58,20 @@ router.route('/apptables/:appid/:columnid/:dbname/:tablename').delete(dynaTableC
 router.route('/updateDynaTabeData/:dbname/:tablename/:id').put(dynaCollectionController.updateCollection);
 router.route('/newDynaTableData/:dbname/:tablename').post(dynaCollectionController.insertCollectionRecord);
 router.route('/deleteDynaTabeRecord/:dbname/:tablename/:id').delete(dynaCollectionController.deleteCollectionRecord);
-router.route('/dynaTabeData/:dbname/:tablename/:userid/:teamid/:fetchteam/:fetchuser').post(dynaCollectionController.getRecordsWithParams);
-router.route('/dynaTabeData/:dbname/:tablename/:userid/:teamid/:fetchteam/:fetchuser').get(dynaCollectionController.getRecords);
+router
+  .route('/dynaTabeData/:dbname/:tablename/:userid/:teamid/:fetchteam/:fetchuser')
+  .post(dynaCollectionController.getRecordsWithParams);
+router
+  .route('/dynaTabeData/:dbname/:tablename/:userid/:teamid/:fetchteam/:fetchuser')
+  .get(dynaCollectionController.getRecords);
 router.route('/dynaFindTabeData/:dbname/:tablename/:id').get(dynaCollectionController.getRecord);
-router.route('/dynaFindTabeDataByColName/:dbname/:tablename/:id/:columnname/:userid/:teamid/:fetchteam/:fetchuser').get(dynaCollectionController.getRecordByColumnName);
+router
+  .route('/dynaFindTabeDataByColName/:dbname/:tablename/:id/:columnname/:userid/:teamid/:fetchteam/:fetchuser')
+  .get(dynaCollectionController.getRecordByColumnName);
 
-router.get('/',
-    (req, res) => {
-      res.status(200).json({ test: 1})
-    }
-  )
+router.get('/', (req, res) => {
+  res.status(200).json({ test: 1 });
+});
 // router.route('/getteams/:appid').get(dynaTableController.getTableById);
 // router.route('/updateteam/:appid/:teamid').put(dynaTableController.updateDynaTable);
 

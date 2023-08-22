@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const { ObjectId } = mongoose.Schema;
-const DynaColumn = require('./dynacolumn.model');
+// const DynaColumn = require('./dynacolumn.model');
 
 const dynaGridColumnSchema = mongoose.Schema(
   {

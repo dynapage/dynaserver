@@ -37,10 +37,9 @@ defaultRoutes.forEach((route) => {
   router.use(route.path, route.route);
 });
 
-
-router.use('/boards', require('./board'))
-router.use('/boards/:boardId/:dbName/sections', require('./section'))
-router.use('/boards/:boardId/:dbName/tasks', require('./task'))
+router.use('/boards', require('./board'));
+router.use('/boards/sections', require('./section'));
+router.use('/boards/:boardId/:dbName/tasks', require('./task'));
 
 /* istanbul ignore next */
 if (config.env === 'development') {

@@ -1,34 +1,36 @@
-const mongoose = require('mongoose')
-const { schemaOptions } = require('./modelOptions')
+const mongoose = require('mongoose');
+const { schemaOptions } = require('./modelOptions');
 
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    username: {
+      type: String,
+      required: true,
+    },
+    password: {
+      type: String,
+      required: true,
+      select: false,
+    },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    createdDate: {
+      type: Date,
+      default: new Date(),
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
   },
-  username: {
-    type: String,
-    required: true,
-  },
-  password: {
-    type: String,
-    required: true,
-    select: false
-  },
-  isEmailVerified: {
-    type: Boolean,
-    default: false,
-  },
-  createdDate: {
-    type: Date,
-    default: new Date(),
-  }
-  ,
-  disabled: {
-    type: Boolean,
-    default: false,
-  }
-}, schemaOptions)
+  schemaOptions
+);
 
-module.exports = mongoose.model('User', userSchema)
+module.exports = mongoose.model('User', userSchema);

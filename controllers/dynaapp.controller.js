@@ -40,7 +40,6 @@ const getDynaAppBySignIn = catchAsync(async (req, res) => {
   res.send(dynaApplication);
 });
 
-
 const getAppByCount = catchAsync(async (req, res) => {
   const dynaApplication = await dynaAppService.getDynaAppCount(req.params.id);
   if (!dynaApplication) {
@@ -75,7 +74,7 @@ const createDynaUser = catchAsync(async (req, res) => {
 });
 
 const updateDynaUser = catchAsync(async (req, res) => {
-  const dynaApplication = await dynaAppService.updateDynaUser(req.params.id, req.params.teamid, req.params.userid ,req.body);
+  const dynaApplication = await dynaAppService.updateDynaUser(req.params.id, req.params.teamid, req.params.userid, req.body);
   res.send(dynaApplication);
 });
 
@@ -83,7 +82,6 @@ const deleteDynaUser = catchAsync(async (req, res) => {
   const dynaApplication = await dynaAppService.deleteDynaUser(req.params.id, req.params.teamid, req.params.userid);
   res.send(dynaApplication);
 });
-
 
 const createDynaTemplate = catchAsync(async (req, res) => {
   const newdb = await dynaAppService.createDynaTemplate(req.params.userid, req.body);
@@ -97,7 +95,7 @@ const createDynaTemplate = catchAsync(async (req, res) => {
 //createDynaTemplate
 
 const deleteDynaApp = catchAsync(async (req, res) => {
-  const results =  await dynaAppService.deleteDynaAppById(req);
+  const results = await dynaAppService.deleteDynaAppById(req);
   res.status(httpStatus.CREATED).send(results);
 });
 

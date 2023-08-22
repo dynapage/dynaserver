@@ -1,11 +1,11 @@
-const config = require('../config/config');
 const { MongoClient } = require('mongodb');
+const config = require('../config/config');
 
 async function connectToDynamicDatabase(databaseName) {
   const url = config.mongoClient; // Replace with your MongoDB server address
   const client = new MongoClient(url, {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
   });
 
   try {
@@ -19,7 +19,4 @@ async function connectToDynamicDatabase(databaseName) {
   }
 }
 
-
-
 module.exports = connectToDynamicDatabase;
-

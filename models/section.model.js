@@ -1,19 +1,25 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
-const { schemaOptions } = require('./modelOptions')
+const mongoose = require('mongoose');
+const { schemaOptions } = require('./modelOptions');
 
-const sectionSchema = new Schema({
-  board: {
-    type: Schema.Types.ObjectId,
-    ref: 'Knbn_board_main',
-    required: true
+const { Schema } = mongoose;
+
+const sectionSchema = new Schema(
+  {
+    board: {
+      type: Schema.Types.ObjectId,
+      ref: 'Knbn_board_main',
+      required: true,
+    },
+    title: {
+      type: String,
+      default: '',
+    },
+    position: {
+      type: Number,
+    },
   },
-  title: {
-    type: String,
-    default: ''
-  }
-}, schemaOptions)
-
+  schemaOptions
+);
 
 const Section = mongoose.model('Knbn_section_main', sectionSchema);
 
