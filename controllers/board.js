@@ -28,7 +28,7 @@ exports.create = async (req, res) => {
   }
 };
 
-exports.getBoardsTimsByDbName = async (req, res) => {
+exports.getBoardsTeamsByDbName = async (req, res) => {
   try {
     const { dbname } = req.params;
     const connection = connectToDynamicMongoose(dbname);

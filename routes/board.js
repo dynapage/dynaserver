@@ -5,7 +5,7 @@ const { verifyToken } = require('../handlers/tokenHandler');
 const boardController = require('../controllers/board');
 const { connectToDynamicMongoose } = require('../utils/mongooseConnection');
 
-const { getBoardsTimsByDbName } = boardController;
+const { getBoardsTeamsByDbName } = boardController;
 const { validate } = validation;
 
 router.post('/', verifyToken, boardController.create);
@@ -61,7 +61,7 @@ router.delete(
   boardController.delete
 );
 
-router.get('/:dbname', validate, verifyToken, getBoardsTimsByDbName);
+router.get('/:dbname', validate, verifyToken, getBoardsTeamsByDbName);
 
 module.exports = router;
 
