@@ -47,17 +47,14 @@ const dynaappSchema = mongoose.Schema(
     validto: {
       type: String,
     },
-    kanban: {
-      enabled: {
-        type: Boolean,
-        default: false,
-      },
-      teamboard: {
-        type: Boolean,
-        default: false,
-      },
+    kanbanenabled: {
+      type: Boolean,
+      default: false,
     },
-
+    teamboard: {
+      type: Boolean,
+      default: false,
+    },
     designers: [DynaDesigner.schema],
     appforms: [DynaForm.schema],
     apptables: [DynaTable.schema],

@@ -1,92 +1,90 @@
-const Task = require('../models/task.model')
-const Section = require('../models/section.model')
+const { taskSchema } = require('../models/task.model');
+const { sectionSchema } = require('../models/section.model');
+
+exports.getAllTasks = async (req, res) => {
+  const { sectionId } = req.params;
+  try {
+    const DynamicTask = req.dbConnection.model('Knbn_task_main');
+    const tasks = await DynamicTask.find({ section: sectionId }).sort('position');
+    res.status(200).json(tasks);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+};
 
 exports.create = async (req, res) => {
-  const { sectionId } = req.body
+  const { sectionId, content, title } = req.body;
   try {
-    const section = await Section.findById(sectionId)
-    const tasksCount = await Task.find({ section: sectionId }).count()
-    const task = await Task.create({
+    const DynamicSection = req.dbConnection.model('Knbn_section_main', sectionSchema);
+    const section = await DynamicSection.findById(sectionId);
+    const DynamicTask = req.dbConnection.model('Knbn_task_main', taskSchema);
+    const tasksCount = await DynamicTask.find({ section: sectionId }).count();
+    const task = await DynamicTask.create({
       section: sectionId,
-      position: tasksCount > 0 ? tasksCount : 0
-    })
-    task._doc.section = section
-    res.status(201).json(task)
+      title,
+      content,
+      position: tasksCount > 0 ? tasksCount : 0,
+    });
+    task._doc.section = section;
+    res.status(201).json(task);
   } catch (err) {
-    res.status(500).json(err)
+    res.status(500).json(err);
   }
-}
+};
 
-exports.update = async (req, res) => {
-  const { taskId } = req.params
+exports.updateTask = async (req, res) => {
+  const { taskId } = req.params;
   try {
-    const task = await Task.findByIdAndUpdate(
-      taskId,
-      { $set: req.body }
-    )
-    res.status(200).json(task)
+    const DynamicTask = req.dbConnection.model('Knbn_task_main');
+    const task = await DynamicTask.findByIdAndUpdate(taskId, { $set: req.body }, { new: req.body });
+    res.status(200).json(task);
   } catch (err) {
-    res.status(500).json(err)
+    res.status(500).json(err);
   }
-}
+};
 
-exports.delete = async (req, res) => {
-  const { taskId } = req.params
+exports.deleteTask = async (req, res) => {
+  const { taskId } = req.params;
   try {
-    const currentTask = await Task.findById(taskId)
-    await Task.deleteOne({ _id: taskId })
-    const tasks = await Task.find({ section: currentTask.section }).sort('postition')
-    for (const key in tasks) {
-      await Task.findByIdAndUpdate(
-        tasks[key].id,
-        { $set: { position: key } }
-      )
-    }
-    res.status(200).json('deleted')
+    const DynamicTask = req.dbConnection.model('Knbn_task_main');
+    const currentTask = await DynamicTask.findById(taskId);
+    await DynamicTask.deleteOne({ _id: taskId });
+    const tasks = await DynamicTask.find({ section: currentTask.section }).sort('position');
+    const updateTasksPromises = tasks.map((task, index) => {
+      return DynamicTask.findByIdAndUpdate(task.id, { $set: { position: index } });
+    });
+    await Promise.all(updateTasksPromises);
+    res.status(200).json('deleted');
   } catch (err) {
-    res.status(500).json(err)
+    res.status(500).json(err);
   }
-}
+};
 
-exports.updatePosition = async (req, res, connection) => {
-
-  const Task = connection.model('Knbn_task_main'); // Assuming 'Task' is your Mongoose model
-  
-  const {
-    resourceList,
-    destinationList,
-    resourceSectionId,
-    destinationSectionId
-  } = req.body
-  const resourceListReverse = resourceList.reverse()
-  const destinationListReverse = destinationList.reverse()
+exports.updatePosition = async (req, res) => {
+  const { resourceList, destinationList, resourceSectionId, destinationSectionId } = req.body;
+  const resourceListReverse = resourceList.reverse();
+  const destinationListReverse = destinationList.reverse();
   try {
-    if (resourceSectionId !== destinationSectionId) {
-      for (const key in resourceListReverse) {
-        await Task.findByIdAndUpdate(
-          resourceListReverse[key].id,
-          {
-            $set: {
-              section: resourceSectionId,
-              position: key
-            }
-          }
-        )
-      }
-    }
-    for (const key in destinationListReverse) {
-      await Task.findByIdAndUpdate(
-        destinationListReverse[key].id,
-        {
-          $set: {
-            section: destinationSectionId,
-            position: key
-          }
-        }
-      )
-    }
-    res.status(200).json('updated')
+    const DynamicTask = req.dbConnection.model('Knbn_task_main');
+    const updateResourcePromises = resourceListReverse.map((resource, index) => {
+      return DynamicTask.findByIdAndUpdate(resource.id, {
+        $set: {
+          section: resourceSectionId,
+          position: index,
+        },
+      });
+    });
+    const updateDestinationPromises = destinationListReverse.map((destination, index) => {
+      return DynamicTask.findByIdAndUpdate(destination.id, {
+        $set: {
+          section: destinationSectionId,
+          position: index,
+        },
+      });
+    });
+    await Promise.all([...updateResourcePromises, ...updateDestinationPromises]);
+    res.status(200).json('updated');
   } catch (err) {
-    res.status(500).json(err)
+    res.status(500).json(err);
   }
-}
+};

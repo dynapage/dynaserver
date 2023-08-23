@@ -1,17 +1,9 @@
-const Board = require('../models/board.model');
-const Section = require('../models/section.model');
-const Task = require('../models/task.model');
-const { connectToDynamicMongoose } = require('../utils/mongooseConnection');
-
-const { boardSchema } = Board;
+const { boardSchema } = require('../models/board.model');
+const { sectionSchema } = require('../models/section.model');
+const { taskSchema } = require('../models/task.model');
 
 exports.create = async (req, res) => {
-  const dbName = req.body.dbName || req.params.dbName;
-  if (!dbName) {
-    return res.status(400).json({ error: 'dbName is required' });
-  }
-  const connection = connectToDynamicMongoose(dbName);
-  const DynamicBoard = connection.model('Knbn_board_main', boardSchema);
+  const DynamicBoard = req.dbConnection.model('Knbn_board_main', boardSchema);
   try {
     const boardsCount = await DynamicBoard.find().count();
     const board = await DynamicBoard.create({
@@ -23,15 +15,15 @@ exports.create = async (req, res) => {
     res.status(201).json(board);
   } catch (err) {
     res.status(500).json(err);
-  } finally {
-    connection.close();
   }
 };
 
 exports.getBoardsTeamsByDbName = async (req, res) => {
   try {
-    const { dbname } = req.params;
-    const connection = connectToDynamicMongoose(dbname);
+    const connection = req.dbConnection;
+    if (!connection) {
+      throw new Error('No database connection available');
+    }
     const DynamicBoard = connection.model('Knbn_board_main', boardSchema);
     const boards = await DynamicBoard.find();
     connection.close();
@@ -41,86 +33,31 @@ exports.getBoardsTeamsByDbName = async (req, res) => {
   }
 };
 
-exports.getAll = async (req, res) => {
-  try {
-    const boards = await Board.find({ user: req.user._id }).sort('-position');
-    res.status(200).json(boards);
-  } catch (err) {
-    res.status(500).json(err);
-  }
-};
-
 exports.updatePosition = async (req, res) => {
   const { boards } = req.body;
+  const DynamicBoard = req.dbConnection.model('Knbn_board_main', boardSchema);
+
   try {
-    for (const key in boards.reverse()) {
-      const board = boards[key];
-      await Board.findByIdAndUpdate(board.id, { $set: { position: key } });
-    }
+    boards.reverse().forEach(async (board, index) => {
+      await DynamicBoard.findByIdAndUpdate(board.id, { $set: { position: index } });
+    });
     res.status(200).json('updated');
   } catch (err) {
     res.status(500).json(err);
   }
 };
 
-// exports.getOne = async (req, res) => {
-//   const { boardId } = req.params
-//   try {
-//     //const board = await Board.findOne({ user: req.user._id, _id: boardId })
-//     const boards = await Board.find()
-//     console.log('    f i r s tboardId  h e r e   ', boards)
-//     const board = await Board.findOne({ _id: boardId })
-//     console.log('    f i r s t h e r e   ', board)
-
-//     if (!board) return res.status(404).json('Board not found')
-//     const sections = await Section.find({ board: boardId })
-//     for (const section of sections) {
-//       const tasks = await Task.find({ section: section.id }).populate('section').sort('-position')
-//       section._doc.tasks = tasks
-//     }
-//     board._doc.sections = sections
-//     res.status(200).json(board)
-//   } catch (err) {
-//     res.status(500).json(err)
-//   }
-// }
-
-exports.getOne = async (req, res, connection) => {
-  const { boardId } = req.params;
-  //try {
-  const Board = connection.model('Knbn_board_main'); // Assuming 'Board' is your Mongoose model
-  const Section = connection.model('Knbn_section_main'); // Assuming 'Section' is your Mongoose model
-  const Task = connection.model('Knbn_task_main'); // Assuming 'Task' is your Mongoose model
-  //const board = await Board.findOne({ user: req.user._id, _id: boardId });
-
-  const board = await Board.findOne({ _id: boardId });
-  if (!board) return res.status(404).json('Board not found');
-
-  const sections = await Section.find({ board: boardId });
-  for (const section of sections) {
-    const tasks = await Task.find({ section: section.id }).populate('section').sort('-position');
-    section._doc.tasks = tasks;
-  }
-
-  board._doc.sections = sections;
-  res.status(200).json(board);
-  // } catch (err) {
-  // res.status(500).json(err);
-  //}
-};
-
-exports.update = async (req, res) => {
+exports.updateOne = async (req, res) => {
+  const DynamicBoard = req.dbConnection.model('Knbn_board_main', boardSchema);
   const { boardId } = req.params;
   const { title, description, favourite } = req.body;
-
   try {
     if (title === '') req.body.title = 'Untitled';
     if (description === '') req.body.description = 'Add description here';
-    const currentBoard = await Board.findById(boardId);
+    const currentBoard = await DynamicBoard.findById(boardId);
     if (!currentBoard) return res.status(404).json('Board not found');
-
     if (favourite !== undefined && currentBoard.favourite !== favourite) {
-      const favourites = await Board.find({
+      const favourites = await DynamicBoard.find({
         user: currentBoard.user,
         favourite: true,
         _id: { $ne: boardId },
@@ -128,14 +65,13 @@ exports.update = async (req, res) => {
       if (favourite) {
         req.body.favouritePosition = favourites.length > 0 ? favourites.length : 0;
       } else {
-        for (const key in favourites) {
-          const element = favourites[key];
-          await Board.findByIdAndUpdate(element.id, { $set: { favouritePosition: key } });
-        }
+        const updatePromises = favourites.map((element, index) =>
+          DynamicBoard.findByIdAndUpdate(element.id, { $set: { favouritePosition: index } })
+        );
+        await Promise.all(updatePromises);
       }
     }
-
-    const board = await Board.findByIdAndUpdate(boardId, { $set: req.body });
+    const board = await DynamicBoard.findByIdAndUpdate(boardId, { $set: req.body }, { new: true });
     res.status(200).json(board);
   } catch (err) {
     res.status(500).json(err);
@@ -143,8 +79,9 @@ exports.update = async (req, res) => {
 };
 
 exports.getFavourites = async (req, res) => {
+  const DynamicBoard = req.dbConnection.model('Knbn_board_main', boardSchema);
   try {
-    const favourites = await Board.find({
+    const favourites = await DynamicBoard.find({
       user: req.user._id,
       favourite: true,
     }).sort('-favouritePosition');
@@ -154,52 +91,75 @@ exports.getFavourites = async (req, res) => {
   }
 };
 
-exports.updateFavouritePosition = async (req, res) => {
-  const { boards } = req.body;
+exports.updateFavouriteStatusForMultipleBoards = async (req, res) => {
+  const DynamicBoard = req.dbConnection.model('Knbn_board_main', boardSchema);
+  const { boards, favourite } = req.body;
   try {
-    for (const key in boards.reverse()) {
-      const board = boards[key];
-      await Board.findByIdAndUpdate(board.id, { $set: { favouritePosition: key } });
+    const updatePromises = boards.map((boardId) =>
+      DynamicBoard.findByIdAndUpdate(boardId, { $set: { favourite } }, { new: favourite })
+    );
+    const updatedBoards = await Promise.all(updatePromises);
+    if (!updatedBoards.length) {
+      return res.status(404).json({ message: 'Boards not found' });
     }
-    res.status(200).json('updated');
+    res.status(200).json(updatedBoards);
   } catch (err) {
     res.status(500).json(err);
   }
 };
 
-exports.delete = async (req, res) => {
+exports.deleteOne = async (req, res) => {
+  const DynamicBoard = req.dbConnection.model('Knbn_board_main', boardSchema);
+  const DynamicSection = req.dbConnection.model('Knbn_section_main', sectionSchema);
+  const DynamicTask = req.dbConnection.model('Knbn_task_main', taskSchema);
   const { boardId } = req.params;
   try {
-    const sections = await Section.find({ board: boardId });
-    for (const section of sections) {
-      await Task.deleteMany({ section: section.id });
-    }
-    await Section.deleteMany({ board: boardId });
-
-    const currentBoard = await Board.findById(boardId);
+    const sections = await DynamicSection.find({ board: boardId });
+    await Promise.all(sections.map((section) => DynamicTask.deleteMany({ section: section.id })));
+    await DynamicSection.deleteMany({ board: boardId });
+    const currentBoard = await DynamicBoard.findById(boardId);
+    if (!currentBoard) return res.status(404).json('Board not found');
 
     if (currentBoard.favourite) {
-      const favourites = await Board.find({
+      const favourites = await DynamicBoard.find({
         user: currentBoard.user,
         favourite: true,
         _id: { $ne: boardId },
       }).sort('favouritePosition');
-
-      for (const key in favourites) {
-        const element = favourites[key];
-        await Board.findByIdAndUpdate(element.id, { $set: { favouritePosition: key } });
-      }
+      await Promise.all(
+        favourites.map((element, index) =>
+          DynamicBoard.findByIdAndUpdate(element.id, { $set: { favouritePosition: index } })
+        )
+      );
     }
-
-    await Board.deleteOne({ _id: boardId });
-
-    const boards = await Board.find().sort('position');
-    for (const key in boards) {
-      const board = boards[key];
-      await Board.findByIdAndUpdate(board.id, { $set: { position: key } });
-    }
-
+    await DynamicBoard.deleteOne({ _id: boardId });
+    const boards = await DynamicBoard.find().sort('position');
+    await Promise.all(boards.map((board, index) => DynamicBoard.findByIdAndUpdate(board.id, { $set: { position: index } })));
     res.status(200).json('deleted');
+  } catch (err) {
+    res.status(500).json(err);
+  }
+};
+
+exports.getOne = async (req, res) => {
+  const DynamicBoard = req.dbConnection.model('Knbn_board_main', boardSchema);
+  const DynamicSection = req.dbConnection.model('Knbn_section_main', sectionSchema);
+  const DynamicTask = req.dbConnection.model('Knbn_task_main', taskSchema);
+  const { boardId } = req.params;
+  try {
+    const board = await DynamicBoard.findOne({ _id: boardId });
+    if (!board) return res.status(404).json('Board not found');
+    const sections = await DynamicSection.find({ board: boardId });
+    const tasksPromises = sections.map(async (section) => {
+      const tasks = await DynamicTask.find({ section: section.id }).populate('section').sort('-position');
+      return {
+        ...section._doc,
+        tasks,
+      };
+    });
+    const updatedSections = await Promise.all(tasksPromises);
+    board._doc.sections = updatedSections;
+    res.status(200).json(board);
   } catch (err) {
     res.status(500).json(err);
   }

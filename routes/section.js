@@ -1,48 +1,17 @@
-const router = require('express').Router({ mergeParams: true });
-const { param } = require('express-validator');
+const router = require('express').Router();
 const { verifyToken } = require('../handlers/tokenHandler');
 const sectionController = require('../controllers/section');
-const validation = require('../handlers/validation');
+const { validate } = require('../handlers/validation');
+const { connectToDB } = require('../utils/connectToDB');
 
-const { createSession, getAllSessions } = sectionController;
-const { validate } = validation;
+const { createSession, getAllSessions, updateSection, deleteSectionAndTasks } = sectionController;
 
-router.post('/', validate, verifyToken, createSession);
+router.post('/', validate, connectToDB, verifyToken, createSession);
 
-router.get('/:dbname/all', validate, verifyToken, getAllSessions);
+router.get('/:dbname/all', validate, connectToDB, verifyToken, getAllSessions);
 
-router.put(
-  '/:sectionId',
-  param('boardId').custom((value) => {
-    if (!validation.isObjectId(value)) {
-      return Promise.reject('invalid board id');
-    } else return Promise.resolve();
-  }),
-  param('sectionId').custom((value) => {
-    if (!validation.isObjectId(value)) {
-      return Promise.reject('invalid section id');
-    } else return Promise.resolve();
-  }),
-  validate,
-  verifyToken,
-  sectionController.update
-);
+router.put('/:sectionId', validate, connectToDB, verifyToken, updateSection);
 
-router.delete(
-  '/:sectionId',
-  param('boardId').custom((value) => {
-    if (!validation.isObjectId(value)) {
-      return Promise.reject('invalid board id');
-    } else return Promise.resolve();
-  }),
-  param('sectionId').custom((value) => {
-    if (!validation.isObjectId(value)) {
-      return Promise.reject('invalid section id');
-    } else return Promise.resolve();
-  }),
-  validate,
-  verifyToken,
-  sectionController.delete
-);
+router.delete('/:sectionId', validate, connectToDB, verifyToken, deleteSectionAndTasks);
 
 module.exports = router;

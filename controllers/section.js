@@ -1,17 +1,15 @@
-const Section = require('../models/section.model');
-const Task = require('../models/task.model');
-const { connectToDynamicMongoose } = require('../utils/mongooseConnection');
-
-const { sessionSchema } = Section;
+const { sectionSchema } = require('../models/section.model');
+const { taskSchema } = require('../models/task.model');
+const { boardSchema } = require('../models/board.model');
 
 exports.createSession = async (req, res) => {
-  const dbName = req.body.dbName || req.params.dbName;
-  if (!dbName) {
-    return res.status(400).json({ error: 'dbName is required' });
-  }
-  const connection = connectToDynamicMongoose(dbName);
-  const DynamicSession = connection.model('Knbn_section_main', sessionSchema);
+  const DynamicBoard = req.dbConnection.model('Knbn_board_main', boardSchema);
+  const DynamicSession = req.dbConnection.model('Knbn_section_main', sectionSchema);
   try {
+    const board = await DynamicBoard.findById(req.body.board);
+    if (!board) {
+      return res.status(404).json('Board not found');
+    }
     const sessionCount = await DynamicSession.find().count();
     const session = await DynamicSession.create({
       board: req.body.board,
@@ -21,42 +19,44 @@ exports.createSession = async (req, res) => {
     res.status(201).json(session);
   } catch (err) {
     res.status(500).json(err);
-  } finally {
-    connection.close();
   }
 };
 
 exports.getAllSessions = async (req, res) => {
+  const DynamicSession = req.dbConnection.model('Knbn_section_main', sectionSchema);
+
   try {
-    const { dbname } = req.params;
-    const connection = connectToDynamicMongoose(dbname);
-    const DynamicSession = connection.model('Knbn_section_main', sessionSchema);
     const sessions = await DynamicSession.find();
     res.status(200).json(sessions);
-    connection.close();
   } catch (err) {
     res.status(500).json(err);
   }
 };
 
-exports.update = async (req, res) => {
+exports.updateSection = async (req, res) => {
   const { sectionId } = req.params;
+  const DynamicSection = req.dbConnection.model('Knbn_section_main', sectionSchema);
   try {
-    const section = await Section.findByIdAndUpdate(sectionId, { $set: req.body });
+    const section = await DynamicSection.findByIdAndUpdate(sectionId, { $set: req.body }, { new: req.body });
+    if (!section) {
+      return res.status(404).json({ message: 'Section not found' });
+    }
     section._doc.tasks = [];
     res.status(200).json(section);
   } catch (err) {
-    res.status(500).josn(err);
+    res.status(500).json(err);
   }
 };
 
-exports.delete = async (req, res) => {
+exports.deleteSectionAndTasks = async (req, res) => {
+  const DynamicSection = req.dbConnection.model('Knbn_section_main', sectionSchema);
+  const DynamicTask = req.dbConnection.model('Knbn_task_main', taskSchema);
   const { sectionId } = req.params;
   try {
-    await Task.deleteMany({ section: sectionId });
-    await Section.deleteOne({ _id: sectionId });
-    res.status(200).json('deleted');
+    await DynamicTask.deleteMany({ section: sectionId });
+    await DynamicSection.deleteOne({ _id: sectionId });
+    res.status(200).json('Section and its tasks deleted');
   } catch (err) {
-    res.status(500).josn(err);
+    res.status(500).json(err);
   }
 };

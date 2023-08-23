@@ -1,78 +1,22 @@
 const router = require('express').Router();
-const { param } = require('express-validator');
-const validation = require('../handlers/validation');
+const { validate } = require('../handlers/validation');
 const { verifyToken } = require('../handlers/tokenHandler');
 const boardController = require('../controllers/board');
-const { connectToDynamicMongoose } = require('../utils/mongooseConnection');
+const { connectToDB } = require('../utils/connectToDB');
 
-const { getBoardsTeamsByDbName } = boardController;
-const { validate } = validation;
+const { getBoardsTeamsByDbName, create, getFavourites, updateFavouriteStatusForMultipleBoards, updateOne, deleteOne } =
+  boardController;
 
-router.post('/', verifyToken, boardController.create);
+router.post('/', verifyToken, connectToDB, create);
 
-router.get('/', verifyToken, boardController.getAll);
+router.get('/:dbname/favourites', verifyToken, connectToDB, getFavourites);
 
-router.put('/', verifyToken, boardController.updatePosition);
+router.put('/favourites', verifyToken, connectToDB, updateFavouriteStatusForMultipleBoards);
 
-router.get('/favourites', verifyToken, boardController.getFavourites);
+router.put('/:boardId', validate, verifyToken, connectToDB, updateOne);
 
-router.put('/favourites', verifyToken, boardController.updateFavouritePosition);
+router.delete('/:boardId', validate, verifyToken, connectToDB, deleteOne);
 
-router.get(
-  '/:boardId/:dbName',
-  param('boardId').custom((value) => {
-    if (!validation.isObjectId(value)) {
-      return Promise.reject('invalid id');
-    } else return Promise.resolve();
-  }),
-  async (req, res) => {
-    const { boardId, dbName } = req.params;
-    try {
-      connection = connectToDynamicMongoose(dbName);
-      await boardController.getOne(req, res, connection);
-      connection.close(); // Close the dynamic connection when done
-    } catch (err) {
-      res.status(500).json(err);
-    }
-  }
-);
-
-router.put(
-  '/:boardId',
-  param('boardId').custom((value) => {
-    if (!validation.isObjectId(value)) {
-      return Promise.reject('invalid id');
-    } else return Promise.resolve();
-  }),
-  validate,
-  verifyToken,
-  boardController.update
-);
-
-router.delete(
-  '/:boardId',
-  param('boardId').custom((value) => {
-    if (!validation.isObjectId(value)) {
-      return Promise.reject('invalid id');
-    } else return Promise.resolve();
-  }),
-  validate,
-  verifyToken,
-  boardController.delete
-);
-
-router.get('/:dbname', validate, verifyToken, getBoardsTeamsByDbName);
+router.get('/:dbname', validate, verifyToken, connectToDB, getBoardsTeamsByDbName);
 
 module.exports = router;
-
-// router.get(
-//   '/:boardId',
-//   param('boardId').custom(value => {
-//     if (!validation.isObjectId(value)) {
-//       return Promise.reject('invalid id')
-//     } else return Promise.resolve()
-//   }),
-//   validate,
-//   verifyToken,
-//   boardController.getOne
-// )
