@@ -60,3 +60,60 @@ exports.deleteSectionAndTasks = async (req, res) => {
     res.status(500).json(err);
   }
 };
+
+exports.getAllBoardsSessions = async (req, res) => {
+  const DynamicBoard = req.dbConnection.model('Knbn_board_main', boardSchema);
+  const DynamicSession = req.dbConnection.model('Knbn_section_main', sectionSchema);
+  try {
+    const board = await DynamicBoard.findOne({ _id: req.params.board });
+    if (!board) {
+      return res.status(404).json('Board not found');
+    }
+    const sessions = await DynamicSession.find({ board: board._id });
+    res.status(200).json(sessions);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+};
+
+exports.updateBoardSection = async (req, res) => {
+  const { board } = req.params;
+  const { columns } = req.body;
+  const DynamicBoard = req.dbConnection.model('Knbn_board_main', boardSchema);
+  const DynamicSection = req.dbConnection.model('Knbn_section_main', sectionSchema);
+  try {
+    const boardInstance = await DynamicBoard.findById(board);
+    if (!boardInstance) {
+      return res.status(404).json({ message: 'Board not found' });
+    }
+    let sections = await DynamicSection.find({ board: boardInstance._id });
+    if (!sections.length && columns.length === 0) {
+      return res.status(404).json({ message: 'No sections found for the given board and no new sections provided' });
+    }
+    for (let i = 0; i < Math.min(sections.length, columns.length); i += 1) {
+      sections[i].title = columns[i];
+      // eslint-disable-next-line no-await-in-loop
+      await sections[i].save();
+    }
+    if (columns.length < sections.length) {
+      for (let i = columns.length; i < sections.length; i += 1) {
+        // eslint-disable-next-line no-await-in-loop
+        await sections[i].remove();
+      }
+    } else {
+      for (let i = sections.length; i < columns.length; i += 1) {
+        const newSection = new DynamicSection({
+          title: columns[i],
+          board: boardInstance._id,
+          position: i,
+        });
+        // eslint-disable-next-line no-await-in-loop
+        await newSection.save();
+      }
+    }
+    sections = await DynamicSection.find({ board: boardInstance._id });
+    res.status(200).json(sections);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+};

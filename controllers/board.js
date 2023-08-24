@@ -50,10 +50,8 @@ exports.updatePosition = async (req, res) => {
 exports.updateOne = async (req, res) => {
   const DynamicBoard = req.dbConnection.model('Knbn_board_main', boardSchema);
   const { boardId } = req.params;
-  const { title, description, favourite } = req.body;
+  const { favourite } = req.body;
   try {
-    if (title === '') req.body.title = 'Untitled';
-    if (description === '') req.body.description = 'Add description here';
     const currentBoard = await DynamicBoard.findById(boardId);
     if (!currentBoard) return res.status(404).json('Board not found');
     if (favourite !== undefined && currentBoard.favourite !== favourite) {
