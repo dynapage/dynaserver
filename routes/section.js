@@ -2,7 +2,7 @@ const router = require('express').Router();
 const { verifyToken } = require('../handlers/tokenHandler');
 const sectionController = require('../controllers/section');
 const { validate } = require('../handlers/validation');
-const { connectToDB } = require('../utils/connectToDB');
+const { connectToDB } = require('../middlewares/connectToDB');
 
 const { createSession, getAllSessions, updateBoardSection, updateSection, deleteSectionAndTasks, getAllBoardsSessions } =
   sectionController;

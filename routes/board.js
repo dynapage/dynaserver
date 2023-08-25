@@ -2,7 +2,7 @@ const router = require('express').Router();
 const { validate } = require('../handlers/validation');
 const { verifyToken } = require('../handlers/tokenHandler');
 const boardController = require('../controllers/board');
-const { connectToDB } = require('../utils/connectToDB');
+const { connectToDB } = require('../middlewares/connectToDB');
 
 const { getBoardsTeamsByDbName, create, getFavourites, updateFavouriteStatusForMultipleBoards, updateOne, deleteOne } =
   boardController;

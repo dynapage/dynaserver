@@ -1,4 +1,4 @@
-const { connectToDynamicMongoose } = require('./mongooseConnection');
+const { connectToDynamicMongoose } = require('../utils/mongooseConnection');
 
 const connectToDB = (req, res, next) => {
   const dbname = req.params.dbname || req.body.dbname || req.query.dbname;

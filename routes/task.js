@@ -2,7 +2,7 @@ const router = require('express').Router({ mergeParams: true });
 const { verifyToken } = require('../handlers/tokenHandler');
 const { validate } = require('../handlers/validation');
 const taskController = require('../controllers/task');
-const { connectToDB } = require('../utils/connectToDB');
+const { connectToDB } = require('../middlewares/connectToDB');
 
 const { create, updatePosition, deleteTask, updateTask, getAllTasks } = taskController;
 
