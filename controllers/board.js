@@ -18,15 +18,10 @@ exports.create = async (req, res) => {
   }
 };
 
-exports.getBoardsTeamsByDbName = async (req, res) => {
+exports.getBoardsByDbName = async (req, res) => {
   try {
-    const connection = req.dbConnection;
-    if (!connection) {
-      throw new Error('No database connection available');
-    }
-    const DynamicBoard = connection.model('Knbn_board_main', boardSchema);
+    const DynamicBoard = req.dbConnection.model('Knbn_board_main', boardSchema);
     const boards = await DynamicBoard.find();
-    connection.close();
     res.status(200).json(boards);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -160,5 +155,15 @@ exports.getOne = async (req, res) => {
     res.status(200).json(board);
   } catch (err) {
     res.status(500).json(err);
+  }
+};
+
+exports.getBoardByTeamId = async (req, res) => {
+  try {
+    const DynamicBoard = req.dbConnection.model('Knbn_board_main', boardSchema);
+    const boards = await DynamicBoard.find({ team: req.params.teamId });
+    res.status(200).json(boards);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

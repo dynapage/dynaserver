@@ -7,16 +7,16 @@ const { connectToDB } = require('../middlewares/connectToDB');
 const { createSession, getAllSessions, updateBoardSection, updateSection, deleteSectionAndTasks, getAllBoardsSessions } =
   sectionController;
 
-router.post('/', validate, connectToDB, verifyToken, createSession);
+router.post('/', validate, verifyToken, connectToDB, createSession);
 
-router.get('/:dbname/all', validate, connectToDB, verifyToken, getAllSessions);
+router.get('/:dbname/all', validate, verifyToken, connectToDB, getAllSessions);
 
-router.get('/:dbname/:board/all', validate, connectToDB, verifyToken, getAllBoardsSessions);
+router.get('/:dbname/:board/all', validate, verifyToken, connectToDB, getAllBoardsSessions);
 
-router.put('/:sectionId', validate, connectToDB, verifyToken, updateSection);
+router.put('/:sectionId', validate, verifyToken, connectToDB, updateSection);
 
-router.put('/:board/all', validate, connectToDB, verifyToken, updateBoardSection);
+router.put('/:board/all', validate, verifyToken, connectToDB, updateBoardSection);
 
-router.delete('/:sectionId', validate, connectToDB, verifyToken, deleteSectionAndTasks);
+router.delete('/:sectionId', validate, verifyToken, connectToDB, deleteSectionAndTasks);
 
 module.exports = router;

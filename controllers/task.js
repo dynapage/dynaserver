@@ -13,7 +13,7 @@ exports.getAllTasks = async (req, res) => {
 };
 
 exports.create = async (req, res) => {
-  const { sectionId, content, title } = req.body;
+  const { sectionId, content, title, assignee } = req.body;
   try {
     const DynamicSection = req.dbConnection.model('Knbn_section_main', sectionSchema);
     const section = await DynamicSection.findById(sectionId);
@@ -24,6 +24,7 @@ exports.create = async (req, res) => {
       title,
       content,
       position: tasksCount > 0 ? tasksCount : 0,
+      assignee,
     });
     task._doc.section = section;
     res.status(201).json(task);
@@ -34,9 +35,10 @@ exports.create = async (req, res) => {
 
 exports.updateTask = async (req, res) => {
   const { taskId } = req.params;
+  const { title, content, assignee } = req.body;
   try {
     const DynamicTask = req.dbConnection.model('Knbn_task_main');
-    const task = await DynamicTask.findByIdAndUpdate(taskId, { $set: req.body }, { new: req.body });
+    const task = await DynamicTask.findByIdAndUpdate(taskId, { $set: { title, content, assignee } }, { new: true });
     res.status(200).json(task);
   } catch (err) {
     res.status(500).json(err);
@@ -62,8 +64,8 @@ exports.deleteTask = async (req, res) => {
 
 exports.updatePosition = async (req, res) => {
   const { resourceList, destinationList, resourceSectionId, destinationSectionId } = req.body;
-  const resourceListReverse = resourceList.reverse();
-  const destinationListReverse = destinationList.reverse();
+  const resourceListReverse = resourceList;
+  const destinationListReverse = destinationList;
   try {
     const DynamicTask = req.dbConnection.model('Knbn_task_main');
     const updateResourcePromises = resourceListReverse.map((resource, index) => {
