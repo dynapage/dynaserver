@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { ObjectId } = mongoose.Schema;
 const { schemaOptions } = require('./modelOptions');
 
 const userSchema = new mongoose.Schema(
@@ -16,6 +17,16 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       select: false,
+    },
+    usersite: {
+      type: String,
+      trim: true,
+    },
+    appid: {
+      type: ObjectId,
+    },
+    teamid: {
+      type: ObjectId,
     },
     isEmailVerified: {
       type: Boolean,

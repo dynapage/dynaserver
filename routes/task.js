@@ -6,14 +6,14 @@ const { connectToDB } = require('../middlewares/connectToDB');
 
 const { create, updatePosition, deleteTask, updateTask, getAllTasks } = taskController;
 
-router.post('/', validate, verifyToken, connectToDB, create);
+router.post('/', validate,  connectToDB, create);
 
-router.put('/update-position', validate, verifyToken, connectToDB, updatePosition);
+router.put('/update-position', validate, connectToDB, updatePosition);
 
-router.get('/:dbname/:sectionId', validate, verifyToken, connectToDB, getAllTasks);
+router.get('/:dbname/:sectionId', validate, connectToDB, getAllTasks);
 
-router.delete('/:taskId', validate, verifyToken, connectToDB, deleteTask);
+router.delete('/:taskId', validate,  connectToDB, deleteTask);
 
-router.put('/:taskId', validate, verifyToken, connectToDB, updateTask);
+router.put('/:taskId', validate,  connectToDB, updateTask);
 
 module.exports = router;

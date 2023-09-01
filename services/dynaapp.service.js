@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const mongodb = require('mongodb');
 const { DynaApp } = require('../models');
+const User = require('../models/user.model');
 const ApiError = require('../utils/ApiError');
 const config = require('../config/config');
 const connectToDynamicDatabase = require('./mongoClientConnection');
@@ -191,12 +192,23 @@ const updateDynaUser = async (id, teamid, userid, AppBody) => {
 };
 
 const deleteDynaUser = async (id, teamid, userid) => {
-  const dynaApp = await DynaApp.findById(id).select(['-appforms', '-referenceObjects', '-apptables']).exec();
-  const dynTeam = dynaApp.teams.find((team) => team._id == teamid);
-  const dynUser = await dynTeam.users.find((user) => user._id == userid);
-  dynUser.remove();
-  dynaApp.save();
-  return dynaApp;
+  try {
+    const dynaApp = await DynaApp.findById(id).select(['-appforms', '-referenceObjects', '-apptables']).exec();
+    const dynTeam = dynaApp.teams.find((team) => team._id == teamid);
+    const dynUser = await dynTeam.users.find((user) => user._id == userid);
+   
+    let username = dynUser.userId;
+    let usersite = dynaApp.sitename;
+
+    const res = await User.deleteOne({ username, usersite })
+    //console.log('-----dynUser------------', dynUser, dynaApp.sitename)
+    dynUser.remove();
+    dynaApp.save();
+    return dynaApp;
+  } catch (error) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
+
+  }
 };
 
 const createDynaTemplate = async (userid, AppBody) => {

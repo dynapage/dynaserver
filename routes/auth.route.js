@@ -42,6 +42,17 @@ router.post(
   userController.login
 )
 
+router.post(
+  '/logininternal',
+  body('username').isLength({ min: 4 }).withMessage(
+    'username must be at least 8 characters'
+  ),
+  body('password').isLength({ min: 4 }).withMessage(
+    'password must be at least 8 characters'
+  ),
+  validation.validate,
+  userController.loginInternal
+)
 
 router.post(
   '/verify-token',
@@ -49,6 +60,13 @@ router.post(
   (req, res) => {
     res.status(200).json({ user: req.user })
   }
+)
+
+router.delete(
+  '/deleteinternal',
+
+  validation.validate,
+  userController.loginInternal
 )
 
 module.exports = router

@@ -14,18 +14,18 @@ const {
   getBoardByTeamId,
 } = boardController;
 
-router.post('/', validate, verifyToken, connectToDB, create);
+router.post('/', validate, connectToDB, create);
 
-router.get('/:dbname/favourites', validate, verifyToken, connectToDB, getFavourites);
+router.get('/:dbname/favourites', validate, connectToDB, getFavourites);
 
-router.put('/favourites', validate, verifyToken, connectToDB, updateFavouriteStatusForMultipleBoards);
+router.put('/favourites', validate,  connectToDB, updateFavouriteStatusForMultipleBoards);
 
-router.put('/:boardId', validate, verifyToken, connectToDB, updateOne);
+router.put('/:boardId', validate, connectToDB, updateOne);
 
-router.delete('/:boardId', validate, verifyToken, connectToDB, deleteOne);
+router.delete('/:boardId', validate,  connectToDB, deleteOne);
 
-router.get('/:dbname', validate, verifyToken, connectToDB, getBoardsByDbName);
+router.get('/:dbname', validate,  connectToDB, getBoardsByDbName);
 
-router.get('/:dbname/:teamId/team', validate, verifyToken, connectToDB, getBoardByTeamId);
+router.get('/:dbname/:teamId/team', validate, connectToDB, getBoardByTeamId);
 
 module.exports = router;
