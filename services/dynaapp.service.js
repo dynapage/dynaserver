@@ -163,9 +163,9 @@ const deleteDynaAppById = async (req) => {
 const createDynaApp = async (userid, AppBody) => {
   const createDbStatus = await createDatabase(AppBody);
   if (createDbStatus) {
-    await DynaApp.create(AppBody);
+    const results =  await DynaApp.create(AppBody);
     // console.log(userid);
-    const results = await getDynaAppByEmail(userid);
+   // const results = await getDynaAppByEmail(userid);
     // console.log('userid');
     return results;
   }

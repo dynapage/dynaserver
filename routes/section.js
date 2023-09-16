@@ -4,14 +4,14 @@ const sectionController = require('../controllers/section');
 const { validate } = require('../handlers/validation');
 const { connectToDB } = require('../middlewares/connectToDB');
 
-const { createSession, getAllSessions, updateBoardSection, updateSection, deleteSectionAndTasks, getAllBoardsSessions } =
+const { createSection, getAllSections, updateBoardSection, updateSection, deleteSectionAndTasks, getAllBoardsSections } =
   sectionController;
 
-router.post('/', validate,  connectToDB, createSession);
+router.post('/', validate,  connectToDB, createSection);
 
-router.get('/:dbname/all', validate,  connectToDB, getAllSessions);
+router.get('/:dbname/all', validate,  connectToDB, getAllSections);
 
-router.get('/:dbname/:board/all', validate, connectToDB, getAllBoardsSessions);
+router.get('/:dbname/:board/all', validate, connectToDB, getAllBoardsSections);
 
 router.put('/:sectionId', validate,  connectToDB, updateSection);
 

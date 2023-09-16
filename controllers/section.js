@@ -2,32 +2,32 @@ const { sectionSchema } = require('../models/section.model');
 const { taskSchema } = require('../models/task.model');
 const { boardSchema } = require('../models/board.model');
 
-exports.createSession = async (req, res) => {
+exports.createSection = async (req, res) => {
   const DynamicBoard = req.dbConnection.model('Knbn_board_main', boardSchema);
-  const DynamicSession = req.dbConnection.model('Knbn_section_main', sectionSchema);
+  const DynamicSection = req.dbConnection.model('Knbn_section_main', sectionSchema);
   try {
     const board = await DynamicBoard.findById(req.body.board);
     if (!board) {
       return res.status(404).json('Board not found');
     }
-    const sessionCount = await DynamicSession.find().count();
-    const session = await DynamicSession.create({
+    const sectionCount = await DynamicSection.find().count();
+    const section = await DynamicSection.create({
       board: req.body.board,
       title: req.body.title,
-      position: sessionCount > 0 ? sessionCount : 0,
+      position: sectionCount > 0 ? sectionCount : 0,
     });
-    res.status(201).json(session);
+    res.status(201).json(section);
   } catch (err) {
     res.status(500).json(err);
   }
 };
 
-exports.getAllSessions = async (req, res) => {
-  const DynamicSession = req.dbConnection.model('Knbn_section_main', sectionSchema);
+exports.getAllSections = async (req, res) => {
+  const DynamicSection = req.dbConnection.model('Knbn_section_main', sectionSchema);
 
   try {
-    const sessions = await DynamicSession.find();
-    res.status(200).json(sessions);
+    const sections = await DynamicSection.find();
+    res.status(200).json(sections);
   } catch (err) {
     res.status(500).json(err);
   }
@@ -61,16 +61,16 @@ exports.deleteSectionAndTasks = async (req, res) => {
   }
 };
 
-exports.getAllBoardsSessions = async (req, res) => {
+exports.getAllBoardsSections = async (req, res) => {
   const DynamicBoard = req.dbConnection.model('Knbn_board_main', boardSchema);
-  const DynamicSession = req.dbConnection.model('Knbn_section_main', sectionSchema);
+  const DynamicSection = req.dbConnection.model('Knbn_section_main', sectionSchema);
   try {
     const board = await DynamicBoard.findOne({ _id: req.params.board });
     if (!board) {
       return res.status(404).json('Board not found');
     }
-    const sessions = await DynamicSession.find({ board: board._id });
-    res.status(200).json(sessions);
+    const sections = await DynamicSection.find({ board: board._id });
+    res.status(200).json(sections);
   } catch (err) {
     res.status(500).json(err);
   }

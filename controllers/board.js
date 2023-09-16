@@ -6,21 +6,27 @@ exports.create = async (req, res) => {
   const DynamicBoard = req.dbConnection.model('Knbn_board_main', boardSchema);
   try {
     const boardsCount = await DynamicBoard.find().count();
+    console.log('----------- we are here ---------201-----', req.user)
     const board = await DynamicBoard.create({
       user: req.user._id,
       team: req.body.team,
       title: req.body.title,
       position: boardsCount > 0 ? boardsCount : 0,
     });
+   
     res.status(201).json(board);
   } catch (err) {
+    console.log('----------- err err ---------201-----', err)
     res.status(500).json(err);
   }
 };
 
 exports.getBoardsByDbName = async (req, res) => {
+  console.log('----------- we are here ----------0------')
   try {
     const DynamicBoard = req.dbConnection.model('Knbn_board_main', boardSchema);
+
+   
     const boards = await DynamicBoard.find();
     res.status(200).json(boards);
   } catch (error) {

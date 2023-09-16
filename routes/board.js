@@ -14,7 +14,8 @@ const {
   getBoardByTeamId,
 } = boardController;
 
-router.post('/', validate, connectToDB, create);
+router.post('/', validate, verifyToken, connectToDB, create);
+//router.post('/', validate, connectToDB, create);
 
 router.get('/:dbname/favourites', validate, connectToDB, getFavourites);
 
