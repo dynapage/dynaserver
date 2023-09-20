@@ -1,10 +1,9 @@
 const httpStatus = require('http-status');
-const mongodb = require('mongodb');
+const { MongoClient } = require('mongodb');
 const { DynaApp } = require('../models');
 const User = require('../models/user.model');
 const ApiError = require('../utils/ApiError');
 const config = require('../config/config');
-const connectToDynamicDatabase = require('./mongoClientConnection');
 
 /**
  * Get DynaApp by id
@@ -26,33 +25,7 @@ const getDynaAppByEmail = async (id) => {
   return apps;
 };
 
-// const getDynaAppBySignIn = async (siteid, userid, pwd) => {
 
-//   const aggInput = [
-//     { $unwind: '$teams' },
-//     { $match: { sitename: siteid } },
-//     { $unwind: '$teams.users' },
-//     {
-//       $match: {
-//         'teams.users.userId': userid,
-//         'teams.users.userpwd': pwd
-//       }
-//     },
-//     {
-//       $project: {
-//         _id: '$teams.users._id',
-//         userId: '$teams.users.userId',
-//         username: '$teams.users.username',
-//         accessType: '$teams.accessType',
-//         teamName: '$teams.teamName',
-//         teamid: '$teams._id',
-//         signedin: siteid,
-//       }
-//     }
-//   ];
-//   const dynaAppTables = await DynaApp.aggregate(aggInput).sort({ accessType: -1 }).exec();
-//   return dynaAppTables;
-// };
 
 const getDynaAppBySignIn = async (siteid, userid, pwd) => {
   const regex = new RegExp(`^${userid}$`, 'i');
@@ -85,23 +58,37 @@ const getDynaAppBySignIn = async (siteid, userid, pwd) => {
   return dynaAppTables;
 };
 
+
+
+
 const getDynaAppCount = async (id) => {
-  //const client = new mongodb.MongoClient(config.mongoose.url, { useNewUrlParser: true, useUnifiedTopology: true });
-
+  let client;
   try {
-    // await client.connect();
-    // const db = client.db("dyna_db");
+    // Create a MongoDB client and connect
+    const url = config.mongoClient; // Replace with your MongoDB server address
+    client = new MongoClient(url, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    await client.connect();
 
-    const db = await connectToDynamicDatabase('dyna_db');
-
+    const db = client.db('dyna_db'); // Use the databaseName directly
     const doccount = await db.collection('applications').countDocuments();
-    //console.log('collection created:', 'DynapageTable', doccount);
-    return { doCount: [doccount] };
+
+    return { doCount: doccount };
   } catch (error) {
     console.error(error);
     return { doCount: 0 };
+  } finally {
+    if (client) {
+      await client.close(); // Close the MongoDB connection in the finally block
+    }
   }
 };
+
+
+
+
 //getDynaAppCount
 
 const getDynaAppTeams = async (id) => {
@@ -162,6 +149,7 @@ const deleteDynaAppById = async (req) => {
 
 const createDynaApp = async (userid, AppBody) => {
   const createDbStatus = await createDatabase(AppBody);
+
   if (createDbStatus) {
     const results =  await DynaApp.create(AppBody);
     // console.log(userid);
@@ -224,27 +212,62 @@ const createDynaTemplate = async (userid, AppBody) => {
   return false;
 };
 
+
+
 async function createDatabase(AppBody) {
-  //const client = new mongodb.MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+  let client;
   try {
-    // await client.connect();
-    const newDB = await connectToDynamicDatabase(AppBody.dbname);
-    //const newDB = await client.db(AppBody.dbname);
+    // Create a MongoDB client and connect
+    const url = config.mongoClient; // Replace with your MongoDB server address
+    client = new MongoClient(url, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    await client.connect();
+
+    const newDB = client.db(AppBody.dbname);
     await newDB.createCollection('DynapageTable');
-    //console.log('collection created:', 'DynapageTable');
+
     return true;
   } catch (error) {
     console.error(error);
     return false;
+  } finally {
+    if (client) {
+      await client.close(); // Close the MongoDB connection in the finally block
+    }
   }
 }
 
-async function dropDatabase(req) {
-  //console.log(req.params.dbname);
-  const db = await connectToDynamicDatabase(req.params.dbname);
 
-  db.dropDatabase();
+
+async function dropDatabase(req) {
+  let client;
+  try {
+    // Create a MongoDB client and connect
+    const url = config.mongoClient; // Replace with your MongoDB server address
+    client = new MongoClient(url, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    await client.connect();
+
+    const db = client.db(req.params.dbname);
+    await db.dropDatabase();
+
+    return true;
+  } catch (error) {
+    console.error(error);
+    return false;
+  } finally {
+    if (client) {
+      await client.close(); // Close the MongoDB connection in the finally block
+    }
+  }
 }
+
+
+
 
 module.exports = {
   getDynaAppTeams,

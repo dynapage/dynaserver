@@ -10,13 +10,15 @@ async function connectToDynamicDatabase(databaseName) {
 
   try {
     await client.connect();
-    const database = client.db(databaseName);
-    console.log(`Dynamic database connection (${databaseName}) established!`);
-    return database;
+    const db = client.db(databaseName);
+    return db;
   } catch (err) {
     console.error(`Dynamic database connection error (${databaseName}):`, err);
     throw err;
   }
 }
 
+
 module.exports = connectToDynamicDatabase;
+
+
