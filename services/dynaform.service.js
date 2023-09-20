@@ -107,7 +107,7 @@ const updateDynaFormById = async (appid, formid, updateBody) => {
     if (!updatedDynaForm) {
       throw new ApiError(httpStatus.NOT_FOUND, 'updatedDynaForm not found');
     }
-    //console.log(updateBody, '--updatedDynaForm:', updatedDynaForm);
+    //console.log('--updatedDynaForm:', appid, formid, updateBody.formula);
     updatedDynaForm.name = updateBody.name;
     updatedDynaForm.label = updateBody.label;
     updatedDynaForm.homepagemenu = updateBody.homepagemenu;
@@ -122,9 +122,9 @@ const updateDynaFormById = async (appid, formid, updateBody) => {
     updatedDynaForm.showuserdata = updateBody.showuserdata;
     updatedDynaForm = updateBody;
 
-    await dynaApp.save();
-    //console.log('--formSchemaRef:', updateBody)
-    return dynaApp.appforms.filter((form) => form.formSchemaRef == updateBody.formSchemaRef);
+    const res = await dynaApp.save();
+  //  console.log('--formSchemaRef:', res.appforms.filter((form) => form.formSchemaRef == updateBody.formSchemaRef))
+    return res; //.appforms.filter((form) => form.formSchemaRef == updateBody.formSchemaRef);
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
   }
