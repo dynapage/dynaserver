@@ -124,7 +124,7 @@ const updateDynaFormById = async (appid, formid, updateBody) => {
 
     const res = await dynaApp.save();
   //  console.log('--formSchemaRef:', res.appforms.filter((form) => form.formSchemaRef == updateBody.formSchemaRef))
-    return res; //.appforms.filter((form) => form.formSchemaRef == updateBody.formSchemaRef);
+    return updatedDynaForm;
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
   }
