@@ -97,7 +97,7 @@ const getDynaAppTeams = async (id) => {
 };
 
 const getDynaAppById = async (id) => {
-  return DynaApp.findById(id).select(['-referenceObjects']).exec();
+  return DynaApp.findById(id).select(['-referenceObjects', '-appforms.sections', '-appforms.columns']).exec();
 };
 
 /**

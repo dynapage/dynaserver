@@ -28,19 +28,17 @@ const DynaTableSchema = {
 const getDynaTables = async (id) => {
   try {
     const dynaApp = await DynaApp.findById(id).select([
-      '-apptables.forms',
+      '-appforms',
+      '-designers',
+      '-teams',
       '-apptables.columns',
       '-referenceObjects',
-      '-userId',
-      '-__v',
       '-_id',
       '-position',
       '-dbname',
       '-name',
       '-active',
-      '-createdon',
-      '-validto',
-      '-startupFormId',
+      '-startupFormid',
     ]);
     if (!dynaApp) {
       throw new ApiError(httpStatus.NOT_FOUND, 'dynaTable not found');
