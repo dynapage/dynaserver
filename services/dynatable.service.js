@@ -100,6 +100,7 @@ const getDynaTableById = async (appid, tableid) => {
         accessid: '$apptables.accessid',
         active: '$apptables.active',
         columns: '$apptables.columns',
+        childTables: '$apptables.childTables',
       },
     },
   ]);
@@ -117,12 +118,16 @@ const updateDynaTableById = async (appid, tableid, updateBody) => {
       throw new ApiError(httpStatus.NOT_FOUND, 'dynaApp not found');
     }
 
-    const updatedDynaTable = dynaApp.apptables.find((tbl) => tbl._id == tableid);
+    let updatedDynaTable = await dynaApp.apptables.find((tbl) => tbl._id == tableid);
     if (!updatedDynaTable) {
       throw new ApiError(httpStatus.NOT_FOUND, 'updatedDynaTable not found');
     }
+    console.log('--childTables:', updateBody)
+    console.log('--updatedDynaTable:', updatedDynaTable)
 
-    updatedDynaTable = updateBody;
+    Object.assign(updatedDynaTable, updateBody);
+
+   // updatedDynaTable = updateBody;
     await dynaApp.save();
 
     return dynaApp.apptables;
