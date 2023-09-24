@@ -24,6 +24,7 @@ const DynaFormSchema = {
   showteamdata: '$appforms.showteamdata',
   showuserdata: '$appforms.showuserdata',
   formula: '$appforms.formula',
+  formsteps: '$appforms.formsteps',
   t1: '$appforms.t1',
   t2: '$appforms.t2',
   t3: '$appforms.t3',
@@ -118,6 +119,7 @@ const updateDynaFormById = async (appid, formid, updateBody) => {
     updatedDynaForm.t4 = updateBody.t4;
     updatedDynaForm.t5 = updateBody.t5;
     updatedDynaForm.formula = updateBody.formula;
+    updatedDynaForm.formsteps = updateBody.formsteps;
     updatedDynaForm.showteamdata = updateBody.showteamdata;
     updatedDynaForm.showuserdata = updateBody.showuserdata;
     updatedDynaForm = updateBody;

@@ -59,6 +59,12 @@ const dynaFormSchema = mongoose.Schema(
       default: false,
     },
     formula: { type: Object },
+    formsteps:
+    {
+      active: { type: Boolean, default: false }, tabs: { type: Boolean, default: false }, restricted: { type: Boolean, default: false }
+      , steps: []
+    },
+
     sections: [DynaFormSection.schema],
   },
   { versionKey: false, timestamps: true }
