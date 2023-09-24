@@ -64,6 +64,12 @@ const updateDynaSection = catchAsync(async (req, res) => {
   res.send(results);
 });
 
+const updateDynaShape = catchAsync(async (req, res) => {
+  const results = await dynaFormService.updateShapeById(req.params,  req.body);
+  res.send(results);
+});
+
+
 const createDynaForm = catchAsync(async (req, res) => {
   const results = await dynaFormService.createDynaForm(req.params.appid, req.params.tableid, req.body);
   res.status(httpStatus.CREATED).send(results);
@@ -79,6 +85,7 @@ module.exports = {
   getFormByID,
   getFormByTableID,
   updateDynaForm,
+  updateDynaShape,
   createDynaForm,
   deleteDynaForm,
   getFormSections,

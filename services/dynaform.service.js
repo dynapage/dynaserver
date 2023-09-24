@@ -125,7 +125,7 @@ const updateDynaFormById = async (appid, formid, updateBody) => {
     updatedDynaForm = updateBody;
 
     const res = await dynaApp.save();
-  //  console.log('--formSchemaRef:', res.appforms.filter((form) => form.formSchemaRef == updateBody.formSchemaRef))
+    //  console.log('--formSchemaRef:', res.appforms.filter((form) => form.formSchemaRef == updateBody.formSchemaRef))
     return updatedDynaForm;
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
@@ -143,7 +143,7 @@ const updateDynaSections = async (appid, formid, updateBody) => {
     if (!updatedDynaForm) {
       throw new ApiError(httpStatus.NOT_FOUND, 'updated DynaForm not found');
     }
-   
+
     updatedDynaForm.sections = updateBody;
 
     //Object.assign(updatedDynaForm.sections, updateBody )
@@ -151,12 +151,56 @@ const updateDynaSections = async (appid, formid, updateBody) => {
     await dynaApp.save();
     const results = await dynaApp.appforms.find((form) => form._id == formid);
     //console.log('------++++-------++----+++------++-------------------', updateBody);
-   
+
     return updatedDynaForm.sections;
 
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
   }
+};
+
+
+const updateShapeById = async (reqParams, body) => {
+
+  try {
+    const { appid, formId, sectionId, columnId, shapeId } = reqParams;
+    const dynaApp = await DynaApp.findById(appid);
+  
+    if (!dynaApp) {
+      return res.status(404).json({ message: 'DynaApp not found' });
+    }
+
+    // Find the column object by ID
+    const form = dynaApp.appforms.id(formId);
+    const section = form.sections.id(sectionId);
+    const column = section.columns.id(columnId);
+
+    if (!column) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Column shape DynaForm not found');
+    
+    }
+
+    // Find and update the shape object by ID
+    const shape = column.shapes.id(shapeId);
+
+    if (!shape) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Shape shape DynaForm not found');
+    }
+
+    // Update the desired properties of the shape object
+    Object.assign(shape, body);
+  
+
+    // Save the dynaApp document with the updated shape
+    await dynaApp.save();
+
+  
+  } catch (error) {
+    console.error(error);
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+  }
+
+
 };
 
 const createDynaForm = async (appid, tableid, updateBody) => {
@@ -258,6 +302,7 @@ module.exports = {
   getDynaFormById,
   getDynaFormByTableId,
   updateDynaFormById,
+  updateShapeById,
   createDynaForm,
   deleteDynaForm,
   getDynaFormsSections,

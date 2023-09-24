@@ -36,6 +36,8 @@ router.route('/appformsbytableid/:appid/:tableid').get(dynaFormController.getFor
 
 router.route('/updatesections/:id/:formid').put(dynaFormController.updateDynaSection);
 
+router.route('/updateshape/:appid/:formId/:sectionId/:columnId/:shapeId').put(dynaFormController.updateDynaShape);
+
 router.route('/grids/:appid').get(dynaFormController.getGrids);
 router.route('/getsections/:appid/:formid').get(dynaFormController.getFormSections);
 
